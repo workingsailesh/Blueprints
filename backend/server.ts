@@ -299,7 +299,13 @@ function buildRepurposingCandidates(clinicalData: any[], marketData: Record<stri
 
 export const app = express();
 
+let isInitialized = false;
+export const initPromise = startServer();
+
 async function startServer() {
+  if (isInitialized) return;
+  isInitialized = true;
+
   // Connect to MongoDB in background — don't block server startup
   connectDB().catch((err) => console.error(err));
 
@@ -331,23 +337,25 @@ async function startServer() {
   app.use(cookieParser());
 
   // Session configuration with MongoDB store
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET || 'your-super-secret-session-key',
-      resave: false,
-      saveUninitialized: false,
-      store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/Blueprints26DB',
-        touchAfter: 24 * 3600, // Lazy session update (in seconds)
-      }),
-      cookie: {
-        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-        httpOnly: true, // Prevents client-side JS from reading the cookie
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      },
-    })
-  );
+  const mongoUrl = process.env.MONGODB_URI;
+  const sessionConfig: any = {
+    secret: process.env.SESSION_SECRET || 'your-super-secret-session-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      httpOnly: true, // Prevents client-side JS from reading the cookie
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    },
+  };
+  if (mongoUrl) {
+    sessionConfig.store = MongoStore.create({
+      mongoUrl,
+      touchAfter: 24 * 3600,
+    });
+  }
+  app.use(session(sessionConfig));
 
   // Initialize Passport
   app.use(passportConfig.initialize());
@@ -878,9 +886,5 @@ async function startServer() {
     });
   }
 }
-
-// Automatically mount routes and middleware when imported (for Vercel serverless)
-// For local execution, startServer handles listening.
-startServer();
 
 export default app;

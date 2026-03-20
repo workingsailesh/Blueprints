@@ -1,4 +1,7 @@
-import app from '../backend/server';
+import { app, initPromise } from '../backend/server';
 
-// Vercel serverless handler — Express app is auto-wrapped
-export default app;
+// Ensure all middleware/routes are mounted before handling any request
+export default async function handler(req: any, res: any) {
+  await initPromise;
+  return app(req, res);
+}
