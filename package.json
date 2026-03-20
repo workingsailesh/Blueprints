@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx backend/server.ts",
-    "build": "vite build",
+    "build": "cd frontend && npm install && npm run build -- --outDir ../dist",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
