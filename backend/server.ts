@@ -309,8 +309,21 @@ async function startServer() {
   }
 
   // CORS configuration
+  const allowedOrigins = [
+    process.env.CLIENT_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ].filter(Boolean);
   app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow same-origin requests (no origin header) and allowed origins
+      if (!origin || allowedOrigins.some(o => origin.startsWith(o!))) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all in production for now
+      }
+    },
     credentials: true,
   }));
 

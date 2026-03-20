@@ -1,8 +1,7 @@
 {
-  "name": "blueprints-ai",
-  "framework": "vite",
-  "buildCommand": "cd frontend && npm install && npm run build -- --outDir ../dist",
-  "outputDirectory": "dist",
+  "installCommand": "npm install && cd frontend && npm install",
+  "buildCommand": "cd frontend && npx vite build",
+  "outputDirectory": "frontend/dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
