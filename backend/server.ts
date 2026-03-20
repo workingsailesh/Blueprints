@@ -297,11 +297,12 @@ function buildRepurposingCandidates(clinicalData: any[], marketData: Record<stri
     .slice(0, 8);
 }
 
+export const app = express();
+
 async function startServer() {
   // Connect to MongoDB in background — don't block server startup
-  connectDB().catch(() => {});
+  connectDB().catch((err) => console.error(err));
 
-  const app = express();
   const PORT = parseInt(process.env.PORT || '3000', 10);
   if (!process.env.SESSION_SECRET) {
     console.warn('[Security] SESSION_SECRET not set — using insecure fallback. Set SESSION_SECRET in .env for production.');
@@ -858,12 +859,15 @@ async function startServer() {
 
   // Vite middleware for development
   
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  }
 }
 
+// Automatically mount routes and middleware when imported (for Vercel serverless)
+// For local execution, startServer handles listening.
 startServer();
 
-
+export default app;

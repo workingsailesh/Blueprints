@@ -1,0 +1,22 @@
+{
+  "name": "blueprints-ai",
+  "framework": "vite",
+  "buildCommand": "cd frontend && npm install && npm run build -- --outDir ../dist",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
+}
